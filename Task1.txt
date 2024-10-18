@@ -91,52 +91,148 @@ def __pow__(self, power: Union[\"Dual"\, Number]) -> "Dual":                    
  __rsub__ = __sub__ 
  __rtruediv__ = __truediv__ 
  __rpow__ = __pow__
-    " \n",
-    " \n",
-    "# Для тестирования я подготовил следующие примеры"
-    " \n",
-    " \n",
-    "   def test_add():  # Сложение   \n", 
-    "   def f(x: float) -> float:     \n",
-    "    return x + 7\n",
-    " assert diff(f)(5) == 1     \n",
-    " \n",
-    " \n",
-    "   def test_sub():   # Вычитание  \n", 
-    "   def f(x: float) -> float:     \n",
-    "    return x - 7\n",
-    " assert diff(f)(5) == 1     \n",
-    " \n",
-       " \n",
-    "   def test_neg():  # отрицание   \n", 
-    "   def f(x: float) -> float:     \n",
-    "    return -x\n",
-    " assert diff(f)(5) == 1     \n",
-    " \n",
-    " \n",
-    "   def test_mul():  # умножение   \n", 
-    "   def f(x: float) -> float:     \n",
-    "    return x * 7\n",
-    " assert diff(f)(5) == 1     \n",
-    " \n",
-    " \n",
-    "   def test_truediv():   # Деление  \n", 
-    "   def f(x: float) -> float:     \n",
-    "    return x / 7\n",
-    " assert diff(f)(5) == 1     \n",
-    " \n",
-    "   def test_pow():  # Возведение в степень   \n", 
-    "   def f(x: float) -> float:     \n",
-    "    return x ** 7\n",
-    " assert diff(f)(5) == 1     \n",
-    " \n",
+
+ #Для тестирования я подготовил следующие примеры"
+def test_add():  # Сложение
+def f(x: float) -> float:
+ return x + 7
+ssert diff(f)(5) == 1 
+
+def test_sub():   # Вычитание
+def f(x: float) -> float: 
+  return x - 7
+assert diff(f)(5) == 1
+
+def test_neg():  # отрицание 
+def f(x: float) -> float: 
+ return -x
+assert diff(f)(5) == 1
+
+def test_mul():  # умножение 
+def f(x: float) -> float: 
+ return x * 7
+assert diff(f)(5) == 1 
+
+def test_truediv():   # Деление
+def f(x: float) -> float: 
+  return x / 7
+assert diff(f)(5) == 1 
+
+def test_pow():  # Возведение в степень 
+def f(x: float) -> float: 
+ return x ** 7\n",
+assert diff(f)(5) == 1  
+
     "# Для запускай тестов надо писать: "
-      " \n",
-    "test_add() \n",
-    "test_sub() \n",
-    "test_neg() \n",
-    "test_mul() \n",
-    "test_truediv() \n",
-    "test_pow() \n",
-    "print(\"+"\) \n",
-    "#На этом задание 1.1. подходит к концу, по коду оно стоит после умножения"
+
+    test_add() 
+    test_sub()
+    test_neg() 
+    test_mul()
+    test_truediv() 
+    test_pow() 
+    print("+")
+
+
+    #На этом задание 1.1. подходит к концу, по коду оно стоит после умножения
+
+
+###########################____________ЗАДАНИЕ 1.2____________###########################
+
+
+# Для начала я добавил библиотеку [import math](https://en.wikipedia.org/wiki/Automatic_differentiation), через нее и будут выполняться действия. Записываем их под нашими прошлыми операциями
+# Теперь просто добавляем к нашему коду, под def __pow__ следующий код:
+
+def exp(self) -> "Dual":
+        from math import exp
+        return Dual(exp(self.value), exp(self.value) * self.d)
+
+def sin(self) -> "Dual":
+        from math import sin, cos
+        return Dual(sin(self.value), cos(self.value) * self.d)
+
+def cos(self) -> "Dual":
+        from math import sin, cos
+        return Dual(cos(self.value), -sin(self.value) * self.d)
+
+def log(self) -> "Dual":
+        from math import log
+        return Dual(log(self.value), self.d / self.value)
+
+# А для тестов подготовил следующие задания
+
+def g(x: float) -> float:                              # exp(x) = exp(x)
+        return Dual(x, 1.0).exp().value
+    g_diff = diff(lambda x: Dual(x, 1.0).exp())
+    assert round(g_diff(2), 5) == round(2.71828**2, 5)
+
+
+    def h(x: float) -> float:                          # sin(x) = cos(x)
+        return Dual(x, 1.0).sin().value
+    h_diff = diff(lambda x: Dual(x, 1.0).sin())
+    assert round(h_diff(0), 5) == 1.0
+
+
+    def j(x: float) -> float:                         # cos(x) = -sin(x)
+        return Dual(x, 1.0).cos().value
+    j_diff = diff(lambda x: Dual(x, 1.0).cos())
+    assert round(j_diff(0), 5) == 0.0
+
+    def k(x: float) -> float:                        # log(x) = 1/x
+        return Dual(x, 1.0).log().value
+    k_diff = diff(lambda x: Dual(x, 1.0).log())
+    assert round(k_diff(2), 5) == 0.5
+
+test_diff()      
+print("+")                                           # При успешном запуске напишется +
+
+
+
+###########################____________ЗАДАНИЕ 1.3____________###########################
+
+
+# Тут я не стал изобретать велосипед, и сделал просто следующие код через derivative 
+
+def derivative(f: Callable[[float], float], x: float, h: float = 1e-5) -> float:
+    return (f(x + h) - f(x - h)) / (2 * h)
+
+def f(x: float) -> float:       #пример
+    return 5 * x ** 2 + 2 * x - 4 / x
+
+
+print(numerical_derivative(f, 2))  # Задали производную = 2 к функции, ответ выдал 22.0
+
+###########################____________ЗАДАНИЕ 1.4____________###########################
+
+#Здесь я сделал это через еще одну библиотеку random (https://docs.python.org/3/library/random.html) и с ее помощью будем создавать случайные функции, а после проверять их и находить производные
+
+import random
+
+def make_function() -> Callable[[float], float]:                 # Генерация случайной функции
+    coefficients = [random.uniform(-10, 10) for _ in range(3)]   # код из библиотеки
+    function_str = f"lambda x: {coefficients[0]} * x ** 2 + {coefficients[1]} * x + {coefficients[2]}"
+    return eval(function_str)
+
+random_func = make_function()    # Присваеваем рандомную функцию к функциям
+print(random_func(2))                        # Значение функции в точке x = 2
+print(numerical_derivative(random_func, 2))  # Численная производная в точке x = 2
+
+
+###########################____________ЗАДАНИЕ 1.5____________###########################
+
+def diff_multivariable(func: Callable[..., float]) -> Callable[..., list]:
+    def wrapper(*args: float) -> list:
+        results = []
+        for i in range(len(args)):
+            dual_args = [Dual(arg, 1.0 if j == i else 0.0) for j, arg in enumerate(args)]
+            results.append(func(*dual_args).d)
+        return results
+    return wrapper
+
+def f(x: float, y: float, z: float) -> float:  # Пример функции с несколькими неизвестными
+    return x * y + z - 5 * y
+
+f_diff = diff_multivariable(f)
+
+# Зададим следующие данные для x, y, z в точке (3, 7, 13)
+print(f_diff(3, 7, 13))  
