@@ -1,0 +1,106 @@
+# В этот раз сделаю всем проще с кодом..
+
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.optimize import minimize_scalar
+sns.set_theme()
+A = np.random.randint(0, 100, size=(200, 50))
+
+# Задание 2.1
+randomstolb_A = A[:, np.random.permutation(A.shape[1])]
+
+# Задание 2.2
+zt_sum = A[:, ::2].sum(axis=1)
+ot_avg = A[:, 1::2].sum(axis=1).mean()
+filt_A = A[zt_sum > ot_avg]
+
+# Задание 2.3
+max_index_diff = np.argmax(A.max(axis=1) - A.min(axis=1))
+
+# Задание 2.4
+sorted_A = np.argsort(A.flatten())
+ranks = np.empty_like(sorted_A)
+ranks[sorted_A] = np.arange(1, len(sorted_A) + 1)
+ranked_A = ranks.reshape(A.shape)
+
+# Задание 2.5
+norm_A = (A - A.min(axis=1, keepdims=True)) / (A.max(axis=1, keepdims=True) - A.min(axis=1, keepdims=True))
+
+# Задание 2.6
+scaled_A = np.stack([A * i for i in range(1, 11)], axis=0)
+
+# Задание 2.7
+grouped_A = np.concatenate((A[:, ::2], A[:, 1::2]), axis=1)
+
+# Задание 2.8
+more_than_5 = np.all(A > 5, axis=1).sum()
+
+# Задание 2.9
+split_A = np.split(A, 10)
+mean_split_A = np.mean(split_A, axis=0)
+
+# Задание 2.10
+unique_elements_A = np.unique(A.flatten(), return_index=True)[1]
+unique_A_flat = A.flatten()[np.sort(unique_elements_A)]
+
+# Задание 2.11
+mean_row = A.mean(axis=0)
+euclidean_distances = np.linalg.norm(A - mean_row, axis=1)
+
+# Задание 2.12
+modified_A = np.where(A < 50, A * 2, A * 3)
+
+# Задание 2.13
+def moving_average(array, window_size):
+    return np.convolve(array, np.ones(window_size) / window_size, mode='valid')
+
+flat_A = A.flatten()
+ma_3 = moving_average(flat_A, 3)
+ma_5 = moving_average(flat_A, 5)
+ma_10 = moving_average(flat_A, 10)
+
+# Выравнивание размеров массивов
+ma_sum = np.zeros(len(ma_3))
+ma_sum[:len(ma_3)] += ma_3
+ma_sum[:len(ma_5)] += ma_5[:len(ma_3)]
+ma_sum[:len(ma_10)] += ma_10[:len(ma_3)]
+
+# Задание 2.14
+x = np.linspace(-10, 10, 1000)
+f_x = (5 * np.sin(2 * x) - np.cos(x) ** 2 - 1 + np.abs(x ** 3) - x ** 2) / (x ** 2 + 1)
+df_dx = np.gradient(f_x, x[1] - x[0])
+
+min_x = minimize_scalar(lambda x: -1 * (5 * np.sin(2 * x) - np.cos(x) ** 2 - 1 + np.abs(x ** 3) - x ** 2) / (x ** 2 + 1)).x
+
+plt.plot(x, f_x, label='f(x)')
+plt.plot(x, df_dx, label="f'(x)")
+plt.scatter(min_x, (5 * np.sin(2 * min_x) - np.cos(min_x) ** 2 - 1 + np.abs(min_x ** 3) - min_x ** 2) / (min_x ** 2 + 1), color='red', label='Min Point')
+plt.legend()
+plt.show()
+
+# Задание 2.15
+def optimized_sample(x, c):
+    x_cumsum = np.cumsum(x)
+    rand_vals = np.random.random(c) * x_cumsum[-1]
+    return np.searchsorted(x_cumsum, rand_vals)
+
+# Задание 2.16
+def optimized_walk(n):
+    return np.cumsum(np.random.choice([-3, -1, 0, 2, 3], size=n)).sum()
+
+# Задание 2.17, пользуемся Numba
+from numba import njit
+
+@njit
+def optimized_strange_conv(a):
+    x, y = a.shape
+    t = 1.0
+    for j in range(y - 5):
+        for i in range(x - 3):
+            c = 1.5 * a[j+1, i+2] - a[j+5, i+3] * a[j, i] + 0.2 * a[j+4, i]
+            t = 0.2 * t + 0.8 * c
+    return t
+
+large_a = np.random.random((10000, 10000))
+optimized_strange_conv(large_a)
