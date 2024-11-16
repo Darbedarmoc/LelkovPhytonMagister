@@ -79,7 +79,7 @@ plt.scatter(min_x, (5 * np.sin(2 * min_x) - np.cos(min_x) ** 2 - 1 + np.abs(min_
 plt.legend()
 plt.show()
 
-# Задание 2.15
+# Задание 2.15 Функция cumsum (сокращение от cumulative sum, т.е. "накопленная сумма")
 def optimized_sample(x, c):
     x_cumsum = np.cumsum(x)
     rand_vals = np.random.random(c) * x_cumsum[-1]
